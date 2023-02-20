@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/start-yoyo
+TryExec=/usr/bin/start-yoyo
+Name=Yoyo Desktop
+Keywords=session
+Comment=session

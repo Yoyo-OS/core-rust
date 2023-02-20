@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# From: https://people.debian.org/~mpitt/systemd.conf-2016-graphical-session.pdf
+
+# robustness: if the previous graphical session left some failed units,
+# reset them so that they don't break this startup
+for unit in $(systemctl --user --no-legend --state=failed --plain list-units | cut -f1 -d' '); do
+    partof="$(systemctl --user show -p PartOf --value "$unit")"
+    for target in yoyo-session.target graphical-session.target; do
+        if [ "$partof" = "$target" ]; then
+            systemctl --user reset-failed "$unit"
+            break
+        fi
+    done
+done
+
+# /etc/profile contains a lot of important environment variables
+source /etc/profile
+
+# load user's profile if it exists
+if [ -n "${HOME}" -a -f "${HOME}/.profile" ]
+then
+    source "${HOME}/.profile"
+fi
+# Environment
+export DESKTOP_SESSION="${DESKTOP_SESSION:=pop:Yoyo}"
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:=pop:Yoyo}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:=pop:Yoyo}"
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:=wayland}"
+export XCURSOR_THEME="${XCURSOR_THEME:=Yoyo-Light}"
+export _JAVA_AWT_WM_NONREPARENTING=1
+export GDK_BACKEND=wayland,x11
+export MOZ_ENABLE_WAYLAND=1
+# Qt
+export QT_QPA_PLATFORMTHEME=yoyo
+export QT_PLATFORM_PLUGIN=yoyo
+# ref: https://stackoverflow.com/questions/34399993/qml-performance-issue-when-updating-an-item-in-presence-of-many-non-overlapping
+export QT_QPA_UPDATE_IDLE_TIME=10
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+
+# import environment variables from the login manager
+systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP
+
+# Run yoyo-session
+if [[ -z "${DBUS_SESSION_BUS_ADDRESS}" ]]; then
+    exec /usr/bin/dbus-run-session -- /usr/bin/yoyo-session
+else
+    exec /usr/bin/yoyo-session
+fi

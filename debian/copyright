@@ -1,0 +1,7 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: yoyo-session
+Source: https://github.com/yoyo-os/yoyo-session
+
+Files: *
+Copyright: Copyright 2022 YoyoOS
+License: Mozilla-Public-License-Version-2-only
