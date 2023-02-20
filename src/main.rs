@@ -5,7 +5,7 @@ mod process_manager;
 
 use std::env;
 use color_eyre::{eyre::WrapErr, Result};
-use tracing::{metadata::LevelFilter, Instrument, info, error};
+use tracing::{metadata::LevelFilter, info, error};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 #[tokio::main(flavor = "current_thread")]

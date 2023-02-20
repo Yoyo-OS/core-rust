@@ -1,4 +1,4 @@
-use color_eyre::{eyre::WrapErr, Result};
+use color_eyre::{Result};
 use launch_pad::{process::Process, ProcessManager};
 use tracing::{info_span, info, Instrument, warn};
 
