@@ -2,11 +2,18 @@ extern crate tracing;
 
 mod systemd;
 mod process_manager;
+mod service;
 
 use std::env;
+use async_signals::Signals;
+use futures_util::StreamExt;
 use color_eyre::{eyre::WrapErr, Result};
+use tokio::{
+	sync::{oneshot}
+};
 use tracing::{metadata::LevelFilter, info, error};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use zbus::ConnectionBuilder;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
@@ -57,7 +64,37 @@ async fn main() -> Result<()> {
     process_manager::start_desktop_process()
         .await
         .wrap_err("failed to start desktop process")?;
+    
+    let (exit_tx, exit_rx) = oneshot::channel();
+	let _ = ConnectionBuilder::session()?
+		.name("com.yoyo.Session")?
+		.serve_at(
+			"/Session",
+			service::SessionService {
+				exit_tx: Some(exit_tx),
+			},
+		)?
+		.build()
+		.await?;
 
+    let mut signals = Signals::new(vec![libc::SIGTERM, libc::SIGINT]).unwrap();
+	loop {
+		tokio::select! {
+			_ = exit_rx => {
+				info!("session exited by request");
+				break;
+			},
+			signal = signals.next() => match signal {
+				Some(libc::SIGTERM | libc::SIGINT) => {
+					info!("received request to terminate");
+					break;
+				}
+				Some(signal) => unreachable!("received unhandled signal {}", signal),
+				None => break,
+			}
+		}
+	}
+	tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     let key = "QT_QPA_PLATFORM";
     env::set_var(key, "wayland");
     assert_eq!(env::var(key), Ok("wayland".to_string()));
