@@ -4,6 +4,7 @@
 
 # robustness: if the previous graphical session left some failed units,
 # reset them so that they don't break this startup
+# 重置上一个图形会话留下的单元，避免他们破坏本次启动
 for unit in $(systemctl --user --no-legend --state=failed --plain list-units | cut -f1 -d' '); do
     partof="$(systemctl --user show -p PartOf --value "$unit")"
     for target in yoyo-session.target graphical-session.target; do
@@ -15,14 +16,17 @@ for unit in $(systemctl --user --no-legend --state=failed --plain list-units | c
 done
 
 # /etc/profile contains a lot of important environment variables
+# /etc/profile 包含许多重要的环境变量
 source /etc/profile
 
 # load user's profile if it exists
+# 加载用户配置文件(如果存在)
 if [ -n "${HOME}" -a -f "${HOME}/.profile" ]
 then
     source "${HOME}/.profile"
 fi
 # Environment
+# 环境
 export DESKTOP_SESSION="${DESKTOP_SESSION:=pop:Yoyo}"
 export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:=pop:Yoyo}"
 export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:=pop:Yoyo}"
@@ -39,9 +43,11 @@ export QT_QPA_UPDATE_IDLE_TIME=10
 export QT_AUTO_SCREEN_SCALE_FACTOR=0
 
 # import environment variables from the login manager
+# 从登录管理器导入环境变量
 systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP
 
 # Run yoyo-session
+# 运行 yoyo-session
 if [[ -z "${DBUS_SESSION_BUS_ADDRESS}" ]]; then
     exec /usr/bin/dbus-run-session -- /usr/bin/yoyo-session
 else

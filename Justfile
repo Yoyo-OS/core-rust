@@ -17,13 +17,16 @@ all: _extract_vendor
 	cargo build {{cargo_args}}
 
 # Installs files into the system
+# 将文件安装到系统中
 install:
 	#!/usr/bin/env sh
 	
 	# main binary
+    # 主程序
 	install -Dm0755 target/release/yoyo-session {{bindir}}/yoyo-session
 
 	# session start script
+    # 会话启动脚本
 	install -Dm0755 data/start-yoyo {{bindir}}/start-yoyo
 	
 	# systemd target

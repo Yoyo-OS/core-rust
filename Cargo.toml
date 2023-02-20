@@ -6,4 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dbus = "0.9.7"
+launch-pad = { git = "https://github.com/yoyo-os/launch-pad" }
+async-signals = "0.4"
+scopeguard = "1.1.0"
+color-eyre = "0.6.2"
+libc = "0.2"
+systemd_client = "0.2.1"
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+zbus = { version = "2", default-features = false, features = ["tokio"] }
+log-panics = { version = "2", features = ["with-backtrace"] }
+tracing = "0.1"
+tracing-journald = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+nix = "0.26.2"
